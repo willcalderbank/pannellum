@@ -92,6 +92,7 @@ var defaultConfig = {
     northOffset: 0,
     showFullscreenCtrl: true,
     dynamic: false,
+    dynamicUpdate: false,
     doubleClickZoom: true,
     keyboardZoom: true,
     mouseZoom: true,
@@ -2287,6 +2288,13 @@ function loadScene(sceneId, targetPitch, targetYaw, targetHfov, fadeDone) {
     }
     fireEvent('scenechange', sceneId);
     load();
+
+    // Properly handle switching to dynamic scenes
+    update = config.dynamicUpdate === true;
+    if (config.dynamic) {
+        panoImage = config.panorama;
+        onImageLoad();
+    }
 }
 
 /**
@@ -2681,15 +2689,19 @@ this.setHorizonPitch = function(pitch) {
  * @memberof Viewer
  * @instance
  * @param {number} [speed] - Auto rotation speed / direction. If not specified, previous value is used.
+ * @param {bool} [doNotChangePitch] - If true pitch will not change.
  * @returns {Viewer} `this`
  */
-this.startAutoRotate = function(speed) {
+this.startAutoRotate = function(speed, doNotChangePitch) {
     speed = speed || autoRotateSpeed || 1;
     config.autoRotate = speed;
-    _this.lookAt(origPitch, undefined, origHfov, 3000);
+    if (!doNotChangePitch) {
+        _this.lookAt(origPitch, undefined, origHfov, 3000);
+    }
     animateInit();
     return this;
 };
+
 
 /**
  * Stop auto rotation.
