@@ -2689,15 +2689,19 @@ this.setHorizonPitch = function(pitch) {
  * @memberof Viewer
  * @instance
  * @param {number} [speed] - Auto rotation speed / direction. If not specified, previous value is used.
+ * @param {bool} [doNotChangePitch] - If true pitch will not change.
  * @returns {Viewer} `this`
  */
-this.startAutoRotate = function(speed) {
+this.startAutoRotate = function(speed, doNotChangePitch) {
     speed = speed || autoRotateSpeed || 1;
     config.autoRotate = speed;
-    _this.lookAt(origPitch, undefined, origHfov, 3000);
+    if (!doNotChangePitch) {
+        _this.lookAt(origPitch, undefined, origHfov, 3000);
+    }
     animateInit();
     return this;
 };
+
 
 /**
  * Stop auto rotation.
