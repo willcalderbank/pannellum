@@ -717,31 +717,31 @@ function Renderer(container) {
                     pendingTextureRequests.splice(i, 1);
                 }
             }
-            
+
             // Allow one request to be pending, so that we can create a texture buffer for that in advance of loading actually beginning
             if (pendingTextureRequests.length === 0) {
                 for (i = 0; i < program.currentNodes.length; i++) {
                     var node = program.currentNodes[i];
                     if (!node.texture && !node.textureLoad) {
                         node.textureLoad = true;
-            
+
                         setTimeout(processNextTile, 0, node);
-                        
+
                         // Only process one tile per frame to improve responsiveness
                         break;
                     }
                 }
             }
-            
+
             // Draw tiles
             multiresDraw();
         }
-        
+
         if (params.returnImage !== undefined) {
-            return canvas.toDataURL('image/png');
+            return canvas.toDataURL('image/jpeg');
         }
     };
-    
+
     /**
      * Check if images are loading.
      * @memberof Renderer
