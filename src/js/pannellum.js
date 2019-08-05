@@ -1421,6 +1421,15 @@ function render() {
     if (loaded) {
         var canvas = renderer.getCanvas();
 
+        if (config.autoRotate !== false) {
+            // When auto-rotating this check needs to happen first (see issue #764)
+            if (config.yaw > 180) {
+                config.yaw -= 360;
+            } else if (config.yaw < -180) {
+                config.yaw += 360;
+            }
+        }
+
         // Keep a tmp value of yaw for autoRotate comparison later
         tmpyaw = config.yaw;
 
@@ -1454,10 +1463,15 @@ function render() {
             config.yaw = Math.max(minYaw, Math.min(maxYaw, config.yaw));
         }
 
-        if (config.yaw > 180) {
-            config.yaw -= 360;
-        } else if (config.yaw < -180) {
-            config.yaw += 360;
+
+        if (!(config.autoRotate !== false)) {
+            // When not auto-rotating, this check needs to happen after the
+            // previous check (see issue #698)
+            if (config.yaw > 180) {
+                config.yaw -= 360;
+            } else if (config.yaw < -180) {
+                config.yaw += 360;
+            }
         }
 
         // Check if we autoRotate in a limited by min and max yaw
@@ -1851,6 +1865,11 @@ function renderHotSpot(hs) {
         coord[1] += (canvasHeight - hs.div.offsetHeight) / 2;
         var transform = 'translate(' + coord[0] + 'px, ' + coord[1] +
             'px) translateZ(9999px) rotate(' + config.roll + 'deg) scale(' + (origHfov/config.hfov) / z + ')' ;
+
+        if (hs.scale) {
+            transform += ' scale(' + (origHfov/config.hfov) / z + ')';
+        }
+
         hs.div.style.webkitTransform = transform;
         hs.div.style.MozTransform = transform;
         hs.div.style.transform = transform;
@@ -2712,19 +2731,20 @@ this.setHorizonPitch = function(pitch) {
 /**
  * Start auto rotation.
  *
- * Before starting rotation, the viewer is panned to the initial pitch.
+ * Before starting rotation, the viewer is panned to `pitch`.
  * @memberof Viewer
  * @instance
  * @param {number} [speed] - Auto rotation speed / direction. If not specified, previous value is used.
- * @param {bool} [doNotChangePitch] - If true pitch will not change.
+
+ * @param {number} [pitch] - The pitch to rotate at. If not specified, inital pitch is used.
  * @returns {Viewer} `this`
  */
-this.startAutoRotate = function(speed, doNotChangePitch) {
+this.startAutoRotate = function(speed, pitch) {
     speed = speed || autoRotateSpeed || 1;
+    pitch = pitch === undefined ? origPitch : pitch;
     config.autoRotate = speed;
-    if (!doNotChangePitch) {
-        _this.lookAt(origPitch, undefined, origHfov, 3000);
-    }
+
+    _this.lookAt(pitch, undefined, origHfov, 3000);
     animateInit();
     return this;
 };
