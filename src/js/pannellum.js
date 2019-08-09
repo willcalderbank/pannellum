@@ -1878,7 +1878,7 @@ function renderHotSpot(hs) {
         coord[0] += (canvasWidth - hs.div.offsetWidth) / 2;
         coord[1] += (canvasHeight - hs.div.offsetHeight) / 2;
         var transform = 'translate(' + coord[0] + 'px, ' + coord[1] +
-            'px) translateZ(9999px) rotate(' + config.roll + 'deg) scale(' + (origHfov/config.hfov) / z + ')' ;
+            'px) translateZ(9999px) rotate(' + config.roll + 'deg)';
 
         if (hs.scale) {
             transform += ' scale(' + (origHfov/config.hfov) / z + ')';
