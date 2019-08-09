@@ -1845,8 +1845,17 @@ function renderHotSpot(hs) {
         configPitchCos = Math.cos(config.pitch * Math.PI / 180),
         yawCos = Math.cos((-hs.yaw + config.yaw) * Math.PI / 180);
     var z = hsPitchSin * configPitchSin + hsPitchCos * yawCos * configPitchCos;
-    if ((hs.yaw <= 90 && hs.yaw > -90 && z <= 0) ||
-      ((hs.yaw > 90 || hs.yaw <= -90) && z <= 0)) {
+
+    var hsWidth = hs.div.offsetWidth
+    if (hs.scale) {
+        hsWidth *= origHfov / config.hfov / z
+    }
+    var hsHDegrees = hsWidth / renderer.getCanvas().clientWidth/ config.hfov;
+
+    if (
+        ((config.yaw - config.hfov/2) - hsHDegrees/2 > hs.yaw) ||
+        ((config.yaw + config.hfov/2) + hsHDegrees/2 < hs.yaw)
+    ) {
         hs.div.style.visibility = 'hidden';
     } else {
         var yawSin = Math.sin((-hs.yaw + config.yaw) * Math.PI / 180),
