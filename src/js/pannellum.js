@@ -1846,21 +1846,13 @@ function renderHotSpot(hs) {
         yawCos = Math.cos((-hs.yaw + config.yaw) * Math.PI / 180);
     var z = hsPitchSin * configPitchSin + hsPitchCos * yawCos * configPitchCos;
 
-    var hsWidth = hs.div.offsetWidth
-    if (hs.scale) {
-        hsWidth *= origHfov / config.hfov / z
-    }
-    var hsHDegrees = hsWidth / renderer.getCanvas().clientWidth/ config.hfov;
-
-    if (
-        ((config.yaw - config.hfov/2) - hsHDegrees/2 > hs.yaw) ||
-        ((config.yaw + config.hfov/2) + hsHDegrees/2 < hs.yaw)
-    ) {
+    if ((hs.yaw <= 90 && hs.yaw > -90 && z <= 0) ||
+      ((hs.yaw > 90 || hs.yaw <= -90) && z <= 0)) {
         hs.div.style.visibility = 'hidden';
     } else {
         var yawSin = Math.sin((-hs.yaw + config.yaw) * Math.PI / 180),
             hfovTan = Math.tan(config.hfov * Math.PI / 360);
-        hs.div.style.visibility = 'visible';
+
         // Subpixel rendering doesn't work in Firefox
         // https://bugzilla.mozilla.org/show_bug.cgi?id=739176
         var canvas = renderer.getCanvas(),
@@ -1877,16 +1869,32 @@ function renderHotSpot(hs) {
         // Apply transform
         coord[0] += (canvasWidth - hs.div.offsetWidth) / 2;
         coord[1] += (canvasHeight - hs.div.offsetHeight) / 2;
-        var transform = 'translate(' + coord[0] + 'px, ' + coord[1] +
-            'px) translateZ(9999px) rotate(' + config.roll + 'deg)';
 
+        var hsWidth = hs.div.offsetWidth
+        var hsHeight = hs.div.offsetHeight
         if (hs.scale) {
-            transform += ' scale(' + (origHfov/config.hfov) / z + ')';
+            hsWidth *= origHfov / config.hfov / z
+            hsHeight *= origHfov / config.hfov / z
         }
 
-        hs.div.style.webkitTransform = transform;
-        hs.div.style.MozTransform = transform;
-        hs.div.style.transform = transform;
+        if (
+            (coord[0] + hsWidth < 0) || (coord[0] - hsWidth > canvasWidth) ||
+            (coord[1] + hsHeight < 0)  || (coord[1] - hsHeight > canvasHeight)
+        ) {
+            hs.div.style.visibility = 'hidden';
+        } else {
+            hs.div.style.visibility = 'visible';
+            var transform = 'translate(' + coord[0] + 'px, ' + coord[1] +
+                'px) translateZ(9999px) rotate(' + config.roll + 'deg)';
+
+            if (hs.scale) {
+                transform += ' scale(' + (origHfov/config.hfov) / z + ')';
+            }
+
+            hs.div.style.webkitTransform = transform;
+            hs.div.style.MozTransform = transform;
+            hs.div.style.transform = transform;
+        }
     }
 }
 
